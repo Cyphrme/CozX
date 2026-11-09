@@ -4,11 +4,12 @@ Coze Proposals can be found at CozeX:
 https://github.com/Cyphrme/CozeX
 
 Work in progress. This is a dumping ground for design changes that would require
-a major version increment.  The following will be somewhat difficult to
-implement and required significant changes.
+a major version increment reasonable things to do while making such a large
+change.  Some of the following will be somewhat difficult to implement and
+required significant changes.
 
 # Action Summary for Coz
-Coze is currently at v0.0.7, so this would be version 1.0.0. These are the
+Coze is currently at v0.0.9, so this would be version 1.0.0. These are the
 changes we're currently in favor of implementing all at once for the major
 version.
 
@@ -22,7 +23,7 @@ msg   -> standard field
 dig   -> standard field
 Default update `now` in `pay` on sign
 `now` 2^53 – 1 error on exception
-ES256:cLj8vsYtMBwYkzoFVZHBZo6SNL8wSdCIjCKAwXNuhOk // Self-describing, non-JSON serialized digests, especially `tmb`s
+Self-describing, non-JSON serialized digests, especially `tmb`s: ES256:cLj8vsYtMBwYkzoFVZHBZo6SNL8wSdCIjCKAwXNuhOk
 Revoke must interpret size set at max 2048 bytes
 Explicitly add in Spec Alg section: Coz assumes `pub` can be deterministically derived from `prv` for all supported algorithms.
 ```
@@ -31,7 +32,7 @@ Explicitly add in Spec Alg section: Coz assumes `pub` can be deterministically d
 
 ## Proposal Emoji Key:
  - ✅ Good ideas we're generally favorable. 
- - 🤔 Maybe.  We're thinking about this. 
+ - 🤔 Maybe.  We're thinking about this or this point is informational.
  - ❌ Bad ideas, but they stay here for discussion.
 
 
@@ -40,29 +41,28 @@ Explicitly add in Spec Alg section: Coz assumes `pub` can be deterministically d
 ## ✅ Cleanup Items
  - Add ES256K (secp256k1) Support to Coze
    https://github.com/Cyphrme/CozeX/issues/6
- - Update `now` as default behavior on sign.
-
 
 
 
 ## ✅ Rename `coze` to `coz`
-Although Coze was started before `coze.com` existed, we want to avoid name
-collisions on search engines.  ByteDance's AI is now called "Coze", making
-finding Coze more difficult.  We're not even going to try to fight with the
-world's most valuable startup.  It also avoids confusion with "Cose", the binary
-cryptographic format.
+Although Coze was started before `coze.com` was populated with anything, we want
+to avoid name collisions on search engines.  ByteDance's AI is now called
+"Coze", making finding Coze more difficult.  We're not even going to try to
+fight with the world's most valuable startup.  It also avoids confusion with
+"Cose", the binary cryptographic format. There doesn't appear to be any Unix
+naming conflict.
 
 `coz` is also three letters, like all other Coze standard fields. `coze` is
-currently the only four letter label. 
+currently the only four letter label.
 
 There is the question of pronunciation.  "Co-z" ("cozy"), two syllables, is
 still a great and memorable pronunciation.  I'd advocate to "co-z" over the
 pronunciation to "cause", with a short "o" like "hot", not "cuz" like cousin or
-the English word "coze". 
+the English word "coze", even though the etymological origin of the name for the
+project is the English word "coze", k-oo-z.
 
 Alternative three letter names considered:
-- `cyf`  (short for Cyphr/Cypher/Cipher)  There doesn't appear to be any Unix
-  naming conflict.  It isn't memorable.
+- `cyf`  (short for Cyphr/Cypher/Cipher)    It isn't memorable.
 
 
 
@@ -114,11 +114,12 @@ Cons:
 ❌ Also consider `mdg` or `msgd`
 https://github.com/Cyphrme/CozeX/blob/master/proposal/msg_msgd_sigd.md Ideally,
 Coze should have a reference for msgs.  This is a pretty big use case for Coze,
-but that proposal sucks. dig vs mdg.  These might be confusing for developers,
+but that proposal sucks, dig vs mdg.  These might be confusing for developers,
 so we need good reason to have both.  Otherwise it's bloat.  Currently,
 overwhelmingly favor just `dig` with type denoting what `dig` is.  The only
-drawback is that this is less agnostic for messages, but it's more agnostic
-overall. 
+drawback is that this is less agnostic for messages, but it's more agnostic than
+being specific.  `typ` should denote what the value of `dig` is, and dig can be
+a message digest.
 
 
 
@@ -223,12 +224,10 @@ unknown keys.
 
 
 
-
-
 ## ✅ Formalize default behavior of updating `now` on sign of `pay`
-If present, `now` should be updated with current time. This is the 99% use case.
-Perhaps provide "do not update `now`" interface which just signs `pay` with no
-modification.
+If present, `now` should be updated with current time by default. This is the
+99% use case. Perhaps provide "do not update `now`" interface which just signs
+`pay` with no modification.
 
 
 
@@ -256,8 +255,6 @@ https://github.com/Cyphrme/Coze/issues/14#issuecomment-1498487320
 
 
 ## ✅ Rename `x` and `d` to something more descriptive
-We are against this, but this is a good time to review why:
-
 As it stands: x is the public component (X||Y for ECDSA, 32-byte public key for
 Ed25519). d is the private component (private scalar for ECDSA, or 32-byte seed
 for Ed25519).
@@ -276,78 +273,6 @@ Considerations
 - pk/sk - Only two letters (breaks Coz convention).  Also confusable with
 "primary key". 
 - pky/sky - "sky" may be confusing. Also confusable with "primary key".
-
-
-
-## 🤔 Seed only keys
-"Seed only keys" are entropic strings that are used by other algorithms to
-deterministically construct keys. The value for `prv` is the the source entropy.
-Ideally, this should be 256 bits.  Seeds are general purpose, and not assumed to
-be for any single algorithm, although in practice they're likely to be tightly
-coupled to specific constructions.
-
-```json
-{
-	"alg":"seed",
-	"hsh": "SHA-256",
-	"iat":1623132000,
-	"tag":"Zami's Seed Demo",
-	"prv":"4q8wm5GwUpYPkdL9vxx9dxVGPbwOW86flaRDnWbt4dQ",
-}
-```
-
-Alternatively, a `hsh` value can be specified with fulfills the role of
-checksums and integrity checking.  
-
-```json
-{
-	"alg":"seed",
-	"iat":1623132000,
-	"tag":"Zami's Seed Demo",
-	"prv":"4q8wm5GwUpYPkdL9vxx9dxVGPbwOW86flaRDnWbt4dQ",
-	"hsh": "SHA-256",
-	"dig":"kdb2gmCEY8VZrO-lt3SRqY4B-cPKQ6a7QkhFi60C83Q"
-}
-```
-
-The seed is then used to generate full keys.  In the case of how Coz already
-generates Ed25519 keys, nothing changes as a "seed" value is already used.  But
-for other algorithms, the "seed" value may differ from the value of `prv` which then used to generate a new `prv` value for the key.
-
-```json
-{
-	"alg":"Ed25519",
-	"iat":1623132000,
-	"tag":"Zami's Ed Seed Demo",
-	"prv":"4q8wm5GwUpYPkdL9vxx9dxVGPbwOW86flaRDnWbt4dQ",
-	"pub":"c9aq5dR9qzf88BXylozrgDa6aJzI60XhjW8tvFId1nM",
-	"tmb":"CuMOdTukG0yDYpWjVCwTCpjIaqatWM0EpmAVEsn0Vvo"
-}
-```
-
-Cyphr.me has created a novel datastructure, the Digest Tree (DT), a reverse
-Merkle tree, that's useful for seeds. https://github.com/Cyphrme/Tree (TODO
-publish paper on the datastructure)  Coze could suggest this datastructure as
-the default derivation method.
-
-
-
-Considerations:
-- Deterministic constructions are likely to become more necessary with the large
-  key sizes of post-quantum.
-- Having a new label, `sed` would require more "private key" logic, specifically
-  sanitizing key to make sure that there are not any private parts. So the
-  combination of `prv` and `"alg":"seed"` is preferred.
-    - This also allows for `tmb` values.
-- There cannot be a `pub` or a `tmb` value without a hashing algorithm specified.
-  - But this is confusing.
-- There's no integrity checking or checksumming without specifying `hsh`.
-- Enforce length?  (Probably not, which means seeds can be unsafe).
-
-Conclusion:
-- There's no real need for this now.
-- There's no reason to include this in core and not in X.
-- Can add this after 1.0
 
 
 
@@ -380,11 +305,8 @@ project, but other similar projects.
   have a hard limit. Perhaps `alg` parameters need to be reframed as "max size". 
 
 
-
 ## ✅ Serialization, Truncation, Checksums, Seeds, and Self-describing
 Add to spec:
-
-
 ## External Digest Serialization
 
 When Coz digest values (such as `tmb`, `dig`, `cad`, or `czd`) are stored
@@ -451,13 +373,86 @@ not desirable and makes the logic handling private component more difficult. If
 caching of private components is needed, those components should be appended to
 `d` and an concatenation method defined by Coze.  
 
-
 Coz assumes `pub` can be deterministically derived from `prv` for all supported
 algorithms. Private keys are treated as canonical seeds or normalized inputs
 that enable this derivation.
 
 
 
+## 🤔 Seed only keys
+"Seed only keys" are entropic strings that are used by other algorithms to
+deterministically construct keys. The value for `prv` is the the source entropy.
+Ideally, this should be 256 bits.  Seeds are general purpose, and not assumed to
+be for any single algorithm, although in practice they're likely to be tightly
+coupled to specific constructions.  This is likely to become more advantageous
+with post-quantum where key sizes are much larger: seeds would allow a known,
+small size for each key.
+
+The critical thing Coz would have to define is a deterministic key derivation
+method for keys.  Some algs are ready to go, others are not, although there is
+prior work and ultimately all algorithms have to do something like this to
+generate private keys in the first place.
+
+```json
+{
+	"alg":"seed",
+	"hsh": "SHA-256",
+	"iat":1623132000,
+	"tag":"Zami's Seed Demo",
+	"prv":"4q8wm5GwUpYPkdL9vxx9dxVGPbwOW86flaRDnWbt4dQ",
+}
+```
+
+Alternatively, a `hsh` value can be specified with fulfills the role of
+checksums and integrity checking.  
+
+```json
+{
+	"alg":"seed",
+	"iat":1623132000,
+	"tag":"Zami's Seed Demo",
+	"prv":"4q8wm5GwUpYPkdL9vxx9dxVGPbwOW86flaRDnWbt4dQ",
+	"hsh": "SHA-256",
+	"dig":"kdb2gmCEY8VZrO-lt3SRqY4B-cPKQ6a7QkhFi60C83Q"
+}
+```
+
+The seed is then used to generate full keys.  In the case of how Coz already
+generates Ed25519 keys, nothing changes as a "seed" value is already used.  But
+for other algorithms, the "seed" value may differ from the value of `prv` which then used to generate a new `prv` value for the key.
+
+```json
+{
+	"alg":"Ed25519",
+	"iat":1623132000,
+	"tag":"Zami's Ed Seed Demo",
+	"prv":"4q8wm5GwUpYPkdL9vxx9dxVGPbwOW86flaRDnWbt4dQ",
+	"pub":"c9aq5dR9qzf88BXylozrgDa6aJzI60XhjW8tvFId1nM",
+	"tmb":"CuMOdTukG0yDYpWjVCwTCpjIaqatWM0EpmAVEsn0Vvo"
+}
+```
+
+Cyphr.me has created a novel datastructure, the Digest Tree (DT), a reverse
+Merkle tree, that's useful for seeds. https://github.com/Cyphrme/Tree (TODO
+publish paper on the datastructure)  Coze could suggest this datastructure as
+the default derivation method.
+
+Considerations:
+- Deterministic constructions are likely to become more necessary with the large
+  key sizes of post-quantum.
+- Having a new label, `sed` would require more "private key" logic, specifically
+  sanitizing key to make sure that there are not any private parts. So the
+  combination of `prv` and `"alg":"seed"` is preferred.
+    - This also allows for `tmb` values.
+- There cannot be a `pub` or a `tmb` value without a hashing algorithm specified.
+  - But this is confusing.
+- There's no integrity checking or checksumming without specifying `hsh`.
+- Enforce length?  (Probably not, which means seeds can be unsafe).
+
+Conclusion:
+- There's no real need for this now.
+- There's no urgent reason to include this in core and not in X.
+- Can add this after 1.0
 
 
 
@@ -583,7 +578,7 @@ mind helps Coz to be better.
 
 
 
-#### Binary Options for general fields
+## 🤔 Binary Options for general fields (Something to keep in mind overall)
 Providing sufficient binary fields so that most `coz` messages can use binary
 storage for binary payloads when at rest. The previous suggestion of adding
 `dig` allows efficient storage without the need for compression, when at rest.
